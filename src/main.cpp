@@ -2,6 +2,7 @@
 #include <LiquidCrystal_I2C.h>
 
 #include <stdio.h>
+#include <WiFi.h>
 #include "sdkconfig.h"
 #include "freertos/task.h"
 #include "esp_system.h"
@@ -17,11 +18,16 @@ LiquidCrystal_I2C lcd1(0x27, lcdColumns, lcdRows);
 LiquidCrystal_I2C lcd2(0x26, lcdColumns, lcdRows);
 
 void printI2CDevices();
-void print_info();
+void print_chip_info();
+void print_wifi_info();
 
 void setup() {
+    Serial.begin(115200);
+    //while (!Serial);
+
     printI2CDevices();
-    print_info();
+    print_chip_info();
+    print_wifi_info();
 
     lcd1.init();
     lcd1.backlight();
@@ -50,15 +56,13 @@ void loop() {
 
     printf("loop\n");
 
-    delay(10000);
+    delay(1000);
     lcd1.clear();
     lcd2.clear();
 }
 
 void printI2CDevices() {
     Wire.begin();
-    Serial.begin(115200);
-    while (!Serial);
 
     byte error, address;
     int i2CDevices;
@@ -94,7 +98,7 @@ void printI2CDevices() {
     }
 }
 
-void print_info() {
+void print_chip_info() {
     esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
     printf("This is %s chip with %d CPU core(s), WiFi%s%s, ",
@@ -111,4 +115,37 @@ void print_info() {
     printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
 
     fflush(stdout);
+}
+
+void print_wifi_info() {
+    // Set WiFi to station mode and disconnect from an AP if it was previously connected
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(100);
+
+    Serial.println("WiFi setup done");
+
+    Serial.println("scan start");
+
+    // WiFi.scanNetworks will return the number of networks found
+    int n = WiFi.scanNetworks();
+    Serial.println("scan done");
+    if (n == 0) {
+        Serial.println("no networks found");
+    } else {
+        Serial.print(n);
+        Serial.println(" networks found");
+        for (int i = 0; i < n; ++i) {
+            // Print SSID and RSSI for each network found
+            Serial.print(i + 1);
+            Serial.print(": ");
+            Serial.print(WiFi.SSID(i));
+            Serial.print(" (");
+            Serial.print(WiFi.RSSI(i));
+            Serial.print(")");
+            Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
+            delay(10);
+        }
+    }
+    Serial.println("");
 }
