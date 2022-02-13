@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include "sdkconfig.h"
-#include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_spi_flash.h"
@@ -62,11 +61,11 @@ void printI2CDevices() {
     while (!Serial);
 
     byte error, address;
-    int I2CDevices;
+    int i2CDevices;
 
     Serial.println("Scanning for I2C Devices...");
 
-    I2CDevices = 0;
+    i2CDevices = 0;
     for (address = 1; address < 127; address++) {
         Wire.beginTransmission(address);
         error = Wire.endTransmission();
@@ -79,7 +78,7 @@ void printI2CDevices() {
             Serial.print(address, HEX);
             Serial.println(" !");
 
-            I2CDevices++;
+            i2CDevices++;
         } else if (error == 4) {
             Serial.print("Unknown error at address 0x");
             if (address < 16) {
@@ -88,7 +87,7 @@ void printI2CDevices() {
             Serial.println(address, HEX);
         }
     }
-    if (I2CDevices == 0) {
+    if (i2CDevices == 0) {
         Serial.println("No I2C devices found\n");
     } else {
         Serial.println("****\n");
