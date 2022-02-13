@@ -5,31 +5,42 @@
 int lcdColumns = 16;
 int lcdRows = 2;
 
-// set LCD address, number of columns and rows
-// if you don't know your display address, run an I2C scanner sketch
-LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);
+// green
+LiquidCrystal_I2C lcd1(0x27, lcdColumns, lcdRows);
+// blue
+LiquidCrystal_I2C lcd2(0x26, lcdColumns, lcdRows);
 
 void setup() {
-    // initialize LCD
-    lcd.init();
-    // turn on LCD backlight
-    lcd.backlight();
+    lcd1.init();
+    lcd1.backlight();
+
+    lcd2.init();
+    lcd2.backlight();
 }
 
 void loop() {
-    // set cursor to first column, first row
-    lcd.setCursor(0, 0);
-    // print message
-    lcd.print("Privet!");
+    lcd1.setCursor(0, 0);
+    lcd2.setCursor(0, 0);
+
+    lcd1.print("Hello!");
+    lcd2.print("LOL");
+
     delay(1000);
-    // clears the display to print new message
-    lcd.clear();
-    // set cursor to first column, second row
-    lcd.setCursor(0, 1);
-    lcd.print("Muesenka!");
+
+    lcd1.clear();
+    lcd2.clear();
+
+    lcd1.setCursor(0, 1);
+    lcd2.setCursor(0, 1);
+
+    lcd1.print("World!");
+    lcd2.print("KEK");
+
     printf("Hello world!\n");
+
     delay(1000);
-    lcd.clear();
+    lcd1.clear();
+    lcd2.clear();
 }
 
 /*
