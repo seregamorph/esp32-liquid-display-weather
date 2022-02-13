@@ -10,7 +10,11 @@ LiquidCrystal_I2C lcd1(0x27, lcdColumns, lcdRows);
 // blue
 LiquidCrystal_I2C lcd2(0x26, lcdColumns, lcdRows);
 
+void printI2CDevices();
+
 void setup() {
+    printI2CDevices();
+
     lcd1.init();
     lcd1.backlight();
 
@@ -41,6 +45,45 @@ void loop() {
     delay(1000);
     lcd1.clear();
     lcd2.clear();
+}
+
+void printI2CDevices() {
+    Wire.begin();
+    Serial.begin(115200);
+    while (!Serial);
+
+    byte error, address;
+    int I2CDevices;
+
+    Serial.println("Scanning for I2C Devices...");
+
+    I2CDevices = 0;
+    for (address = 1; address < 127; address++) {
+        Wire.beginTransmission(address);
+        error = Wire.endTransmission();
+
+        if (error == 0) {
+            Serial.print("I2C device found at address 0x");
+            if (address < 16) {
+                Serial.print("0");
+            }
+            Serial.print(address, HEX);
+            Serial.println(" !");
+
+            I2CDevices++;
+        } else if (error == 4) {
+            Serial.print("Unknown error at address 0x");
+            if (address < 16) {
+                Serial.print("0");
+            }
+            Serial.println(address, HEX);
+        }
+    }
+    if (I2CDevices == 0) {
+        Serial.println("No I2C devices found\n");
+    } else {
+        Serial.println("****\n");
+    }
 }
 
 /*
