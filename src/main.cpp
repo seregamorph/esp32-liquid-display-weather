@@ -1,6 +1,13 @@
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 
+#include <stdio.h>
+#include "sdkconfig.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_system.h"
+#include "esp_spi_flash.h"
+
 // set the LCD number of columns and rows
 int lcdColumns = 16;
 int lcdRows = 2;
@@ -11,9 +18,11 @@ LiquidCrystal_I2C lcd1(0x27, lcdColumns, lcdRows);
 LiquidCrystal_I2C lcd2(0x26, lcdColumns, lcdRows);
 
 void printI2CDevices();
+void print_info();
 
 void setup() {
     printI2CDevices();
+    print_info();
 
     lcd1.init();
     lcd1.backlight();
@@ -40,9 +49,9 @@ void loop() {
     lcd1.print("World!");
     lcd2.print("KEK");
 
-    printf("Hello world!\n");
+    printf("loop\n");
 
-    delay(1000);
+    delay(10000);
     lcd1.clear();
     lcd2.clear();
 }
@@ -86,18 +95,7 @@ void printI2CDevices() {
     }
 }
 
-/*
-#include <stdio.h>
-#include "sdkconfig.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_system.h"
-#include "esp_spi_flash.h"
-
-void app_main(void)
-{
-    printf("Hello world!\n");
-
+void print_info() {
     esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
     printf("This is %s chip with %d CPU core(s), WiFi%s%s, ",
@@ -113,12 +111,5 @@ void app_main(void)
 
     printf("Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
 
-    for (int i = 10; i >= 0; i--) {
-        printf("Restarting in %d seconds___\n", i);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-    printf("Restarting now.\n");
     fflush(stdout);
-    esp_restart();
 }
-*/
