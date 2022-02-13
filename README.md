@@ -6,8 +6,10 @@ https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers
 ## Install CLion
 
 ## Install PlatformIO
+* https://docs.platformio.org/en/latest/core/installation.html
 
 ## Reference links
+* https://www.electronicshub.org/getting-started-with-esp32/
 * https://www.aliexpress.com/item/32996463686.html
 * https://randomnerdtutorials.com/esp32-esp8266-i2c-lcd-arduino-ide/
 

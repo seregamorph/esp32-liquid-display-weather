@@ -20,6 +20,7 @@ LiquidCrystal_I2C lcd2(0x26, lcdColumns, lcdRows);
 void printI2CDevices();
 void print_chip_info();
 void print_wifi_info();
+void initWiFi();
 
 void setup() {
     Serial.begin(115200);
@@ -41,9 +42,25 @@ void loop() {
     lcd2.setCursor(0, 0);
 
     lcd1.print("Hello!");
-    lcd2.print("LOL");
 
-    delay(1000);
+    WiFi.mode(WIFI_STA);
+    Serial.print("Connecting to WiFi ..");
+
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print('.');
+
+        lcd2.clear();
+        lcd2.setCursor(0, 0);
+        lcd2.print("Connecting");
+
+        lcd2.setCursor(0, 1);
+        lcd2.printf("%d", WiFi.status());
+
+        delay(100);
+    }
+    Serial.println(WiFi.localIP());
+
+//    delay(1000);
 
     lcd1.clear();
     lcd2.clear();
@@ -52,11 +69,15 @@ void loop() {
     lcd2.setCursor(0, 1);
 
     lcd1.print("World!");
-    lcd2.print("KEK");
+
+    lcd2.setCursor(0, 0);
+    lcd2.print("Connected");
+    lcd2.setCursor(0, 1);
+    lcd2.print(WiFi.localIP());
 
     printf("loop\n");
 
-    delay(1000);
+    delay(600000);
     lcd1.clear();
     lcd2.clear();
 }
@@ -148,4 +169,7 @@ void print_wifi_info() {
         }
     }
     Serial.println("");
+}
+
+void initWiFi() {
 }
