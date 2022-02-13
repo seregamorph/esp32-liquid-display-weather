@@ -12,6 +12,7 @@ https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers
 * https://www.electronicshub.org/getting-started-with-esp32/
 * https://www.aliexpress.com/item/32996463686.html
 * https://randomnerdtutorials.com/esp32-esp8266-i2c-lcd-arduino-ide/
+* https://randomnerdtutorials.com/esp32-useful-wi-fi-functions-arduino/
 
 ## Find esp port
 ```
