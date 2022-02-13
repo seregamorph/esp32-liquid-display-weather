@@ -7,6 +7,8 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_spi_flash.h"
+// wifi creds here
+#include "secret.h"
 
 // set the LCD number of columns and rows
 int lcdColumns = 16;
@@ -45,8 +47,12 @@ void loop() {
 
     WiFi.mode(WIFI_STA);
     Serial.print("Connecting to WiFi ..");
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
     while (WiFi.status() != WL_CONNECTED) {
+        // observer sequence of Wifi statuses: 6 (disconnected), 0 (idle), 3 (connected)
+        // or constant 6 if WiFi password is wrong
+        // or 1 if the network SSID is not correct
         Serial.print('.');
 
         lcd2.clear();
@@ -56,7 +62,7 @@ void loop() {
         lcd2.setCursor(0, 1);
         lcd2.printf("%d", WiFi.status());
 
-        delay(100);
+        delay(500);
     }
     Serial.println(WiFi.localIP());
 
