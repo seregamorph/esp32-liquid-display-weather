@@ -1,4 +1,5 @@
 // Based on the work by DFRobot
+// Original source code got from https://github.com/johnrickman/LiquidCrystal_I2C
 
 #include "LiquidCrystal_I2C.h"
 #include <inttypes.h>
