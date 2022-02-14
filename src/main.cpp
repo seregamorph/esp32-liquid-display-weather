@@ -9,10 +9,12 @@
 #include "esp_spi_flash.h"
 // wifi creds here
 #include "secret.h"
+#include <HTTPClient.h>
 
 // set the LCD number of columns and rows
 int lcdColumns = 16;
 int lcdRows = 2;
+String weatherUrl = "http://api.weatherapi.com/v1/current.json?key=" + WEATHER_API_TOKEN + "&q=Amstelveen&aqi=no";
 
 // green
 LiquidCrystal_I2C lcd1(0x27, lcdColumns, lcdRows);
@@ -20,13 +22,13 @@ LiquidCrystal_I2C lcd1(0x27, lcdColumns, lcdRows);
 LiquidCrystal_I2C lcd2(0x26, lcdColumns, lcdRows);
 
 void printI2CDevices();
+
 void print_chip_info();
+
 void print_wifi_info();
-void initWiFi();
 
 void setup() {
     Serial.begin(115200);
-    //while (!Serial);
 
     printI2CDevices();
     print_chip_info();
@@ -82,6 +84,33 @@ void loop() {
     lcd2.print(WiFi.localIP());
 
     printf("loop\n");
+
+    HTTPClient http;
+    http.begin(weatherUrl.c_str());
+    int httpResponseCode = http.GET();
+
+    lcd1.clear();
+    lcd2.clear();
+
+    if (httpResponseCode > 0) {
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+        String payload = http.getString();
+        Serial.println(payload);
+
+        lcd2.setCursor(0, 0);
+        lcd2.printf("HTTP code %d", httpResponseCode);
+        lcd2.setCursor(0, 1);
+        lcd2.print(payload.length());
+    } else {
+        Serial.print("Error code: ");
+        Serial.println(httpResponseCode);
+
+        lcd2.setCursor(0, 0);
+        lcd2.printf("Error %d", httpResponseCode);
+    }
+    // Free resources
+    http.end();
 
     delay(600000);
     lcd1.clear();
@@ -170,12 +199,9 @@ void print_wifi_info() {
             Serial.print(" (");
             Serial.print(WiFi.RSSI(i));
             Serial.print(")");
-            Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
+            Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? " " : "*");
             delay(10);
         }
     }
     Serial.println("");
-}
-
-void initWiFi() {
 }
