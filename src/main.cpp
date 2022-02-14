@@ -10,6 +10,7 @@
 // wifi creds here
 #include "secret.h"
 #include <HTTPClient.h>
+#include <ArduinoJson.h>
 
 // set the LCD number of columns and rows
 int lcdColumns = 16;
@@ -98,10 +99,29 @@ void loop() {
         String payload = http.getString();
         Serial.println(payload);
 
+        lcd1.setCursor(0, 0);
+        lcd1.print("Amstelveen");
+
+        StaticJsonDocument<2048> doc;
+        DeserializationError error = deserializeJson(doc, payload.c_str());
+
+        if (error) {
+            Serial.print(F("deserializeJson() failed: "));
+            Serial.println(error.f_str());
+            delay(600000);
+        }
+
+        //JSONVar myObject = JSON.parse(sensorReadings);
+
         lcd2.setCursor(0, 0);
-        lcd2.printf("HTTP code %d", httpResponseCode);
+        lcd2.print("Temp");
+
         lcd2.setCursor(0, 1);
-        lcd2.print(payload.length());
+        const double temp_c = doc["current"]["temp_c"];
+        lcd2.print(temp_c);
+        //lcd2.printf("", );
+//        lcd2.setCursor(0, 1);
+//        lcd2.print(payload.length());
     } else {
         Serial.print("Error code: ");
         Serial.println(httpResponseCode);
@@ -175,8 +195,12 @@ void print_chip_info() {
 
 void print_wifi_info() {
     // Set WiFi to station mode and disconnect from an AP if it was previously connected
+    Serial.println("WiFi setup...");
+
     WiFi.mode(WIFI_STA);
+    Serial.println("WiFi mode...");
     WiFi.disconnect();
+    Serial.println("WiFi disconnect...");
     delay(100);
 
     Serial.println("WiFi setup done");
