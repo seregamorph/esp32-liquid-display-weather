@@ -1,16 +1,17 @@
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
-
-#include <stdio.h>
 #include <WiFi.h>
-#include "sdkconfig.h"
-#include "freertos/task.h"
-#include "esp_system.h"
+#include <stdio.h>
+
 #include "esp_spi_flash.h"
+#include "esp_system.h"
+#include "freertos/task.h"
+#include "sdkconfig.h"
 // wifi creds here
-#include "secret.h"
-#include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include <HTTPClient.h>
+
+#include "secret.h"
 
 // set the LCD number of columns and rows
 int lcdColumns = 16;
@@ -69,7 +70,7 @@ void loop() {
     }
     Serial.println(WiFi.localIP());
 
-//    delay(1000);
+    //    delay(1000);
 
     lcd1.clear();
     lcd2.clear();
@@ -111,7 +112,7 @@ void loop() {
             delay(600000);
         }
 
-        //JSONVar myObject = JSON.parse(sensorReadings);
+        // JSONVar myObject = JSON.parse(sensorReadings);
 
         lcd2.setCursor(0, 0);
         lcd2.print("Temp");
@@ -119,9 +120,9 @@ void loop() {
         lcd2.setCursor(0, 1);
         const double temp_c = doc["current"]["temp_c"];
         lcd2.print(temp_c);
-        //lcd2.printf("", );
-//        lcd2.setCursor(0, 1);
-//        lcd2.print(payload.length());
+        // lcd2.printf("", );
+        //        lcd2.setCursor(0, 1);
+        //        lcd2.print(payload.length());
     } else {
         Serial.print("Error code: ");
         Serial.println(httpResponseCode);
