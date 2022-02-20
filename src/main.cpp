@@ -3,6 +3,8 @@
 #include <WiFi.h>
 #include <stdio.h>
 
+#include <string>
+
 #include "esp_spi_flash.h"
 #include "esp_system.h"
 #include "freertos/task.h"
@@ -11,17 +13,22 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 
+#include "HardwareSerial.h"
+#include "TinyGPSPlus.h"
 #include "secret.h"
+#include "types.h"
 
 // set the LCD number of columns and rows
 int lcdColumns = 16;
 int lcdRows = 2;
-String weatherUrl = "http://api.weatherapi.com/v1/current.json?key=" + WEATHER_API_TOKEN + "&q=Amstelveen&aqi=no";
 
 // green
 LiquidCrystal_I2C lcd1(0x27, lcdColumns, lcdRows);
 // blue
 LiquidCrystal_I2C lcd2(0x26, lcdColumns, lcdRows);
+
+TinyGPSPlus gps;
+HardwareSerial SerialGPS(2);
 
 void printI2CDevices();
 
@@ -31,30 +38,67 @@ void print_wifi_info();
 
 void setup() {
     Serial.begin(115200);
+    SerialGPS.begin(9600, SERIAL_8N1, 16, 17);
 
     printI2CDevices();
     print_chip_info();
-    print_wifi_info();
+    // print_wifi_info();
 
     lcd1.init();
     lcd1.backlight();
 
     lcd2.init();
     lcd2.backlight();
+
+    lcd1.clear();
+    lcd2.clear();
 }
 
 void loop() {
     lcd1.setCursor(0, 0);
     lcd2.setCursor(0, 0);
 
-    lcd1.print("Hello!");
+    lcd1.print("GPS connecting");
+
+    Serial.println("Connecting GPS");
+
+    while (gps.satellites.value() < 4) {
+        while (SerialGPS.available() > 0) {
+            char ch = SerialGPS.read();
+            Serial.write(ch);
+            gps.encode(ch);
+        }
+
+        Serial.println();
+        Serial.print("LAT=");
+        Serial.println(gps.location.lat(), 6);
+        Serial.print("LONG=");
+        Serial.println(gps.location.lng(), 6);
+        Serial.print("ALT=");
+        Serial.println(gps.altitude.meters());
+        Serial.print("Time=");
+        Serial.println(gps.time.value());
+        Serial.print("Satellites=");
+        Serial.println(gps.satellites.value());
+
+        lcd2.clear();
+        lcd2.setCursor(0, 0);
+        lcd2.printf("Satellittes: %d", gps.satellites.value());
+        delay(1000);
+    }
+
+    Serial.println();
+
+    Serial.print("Connecting to WiFi ..");
+    lcd1.clear();
+    lcd1.setCursor(0, 0);
+    lcd1.print("Connecting to WiFi");
 
     WiFi.mode(WIFI_STA);
-    Serial.print("Connecting to WiFi ..");
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
     while (WiFi.status() != WL_CONNECTED) {
-        // observer sequence of Wifi statuses: 6 (disconnected), 0 (idle), 3 (connected)
+        // observed sequence of Wifi statuses: 6 (disconnected), 0 (idle), 3 (connected)
         // or constant 6 if WiFi password is wrong
         // or 1 if the network SSID is not correct
         Serial.print('.');
@@ -85,9 +129,18 @@ void loop() {
     lcd2.setCursor(0, 1);
     lcd2.print(WiFi.localIP());
 
-    printf("loop\n");
+    lcd1.clear();
+    lcd1.setCursor(0, 0);
+    lcd1.print("Requesting weather");
 
     HTTPClient http;
+    String weatherUrl = String("http://api.openweathermap.org/data/2.5/weather?lat=") +
+                        String(gps.location.lat(), 4) +
+                        String("&lon=") +
+                        String(gps.location.lng(), 4) +
+                        String("&appid=") +
+                        OPENWEATHERMAP_TOKEN;
+    Serial.println(weatherUrl);
     http.begin(weatherUrl.c_str());
     int httpResponseCode = http.GET();
 
@@ -100,9 +153,6 @@ void loop() {
         String payload = http.getString();
         Serial.println(payload);
 
-        lcd1.setCursor(0, 0);
-        lcd1.print("Amstelveen");
-
         StaticJsonDocument<2048> doc;
         DeserializationError error = deserializeJson(doc, payload.c_str());
 
@@ -112,14 +162,18 @@ void loop() {
             delay(600000);
         }
 
-        // JSONVar myObject = JSON.parse(sensorReadings);
+        lcd1.setCursor(0, 0);
+        String name = doc["name"];
+        lcd1.print(name);
 
         lcd2.setCursor(0, 0);
         lcd2.print("Temp");
 
         lcd2.setCursor(0, 1);
-        const double temp_c = doc["current"]["temp_c"];
+        const double temp_k = doc["main"]["temp"];
+        const double temp_c = temp_k - 273.15;
         lcd2.print(temp_c);
+        lcd2.print(" degree");
         // lcd2.printf("", );
         //        lcd2.setCursor(0, 1);
         //        lcd2.print(payload.length());
@@ -194,6 +248,7 @@ void print_chip_info() {
     fflush(stdout);
 }
 
+/*
 void print_wifi_info() {
     // Set WiFi to station mode and disconnect from an AP if it was previously connected
     Serial.println("WiFi setup...");
@@ -230,3 +285,4 @@ void print_wifi_info() {
     }
     Serial.println("");
 }
+*/
